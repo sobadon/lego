@@ -128,6 +128,7 @@ func allDNSCodes() string {
 		"scaleway",
 		"selectel",
 		"selectelv2",
+		"selfdns",
 		"selfhostde",
 		"servercow",
 		"shellrent",
@@ -2644,6 +2645,16 @@ func displayDNSHelp(w io.Writer, name string) error {
 
 		ew.writeln()
 		ew.writeln(`More information: https://go-acme.github.io/lego/dns/selectelv2`)
+
+	case "selfdns":
+		// generated from: providers/dns/selfdns/selfdns.toml
+		ew.writeln(`Configuration for selfdns.`)
+		ew.writeln(`Code:	'selfdns'`)
+		ew.writeln(`Since:	'vX.Y.Z'`)
+		ew.writeln()
+
+		ew.writeln()
+		ew.writeln(`More information: https://go-acme.github.io/lego/dns/selfdns`)
 
 	case "selfhostde":
 		// generated from: providers/dns/selfhostde/selfhostde.toml

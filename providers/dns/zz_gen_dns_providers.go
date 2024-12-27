@@ -122,6 +122,7 @@ import (
 	"github.com/go-acme/lego/v4/providers/dns/scaleway"
 	"github.com/go-acme/lego/v4/providers/dns/selectel"
 	"github.com/go-acme/lego/v4/providers/dns/selectelv2"
+	"github.com/go-acme/lego/v4/providers/dns/selfdns"
 	"github.com/go-acme/lego/v4/providers/dns/selfhostde"
 	"github.com/go-acme/lego/v4/providers/dns/servercow"
 	"github.com/go-acme/lego/v4/providers/dns/shellrent"
@@ -388,6 +389,8 @@ func NewDNSChallengeProviderByName(name string) (challenge.Provider, error) {
 		return selectel.NewDNSProvider()
 	case "selectelv2":
 		return selectelv2.NewDNSProvider()
+	case "selfdns":
+		return selfdns.NewDNSProvider()
 	case "selfhostde":
 		return selfhostde.NewDNSProvider()
 	case "servercow":

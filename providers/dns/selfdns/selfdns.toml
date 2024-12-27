@@ -1,0 +1,9 @@
+Name = "selfdns"
+Description = ''''''
+URL = ""
+Code = "selfdns"
+Since = "vX.Y.Z"
+
+Example = '''
+dummy
+'''
