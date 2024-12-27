@@ -8,14 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/miekg/dns"
 )
 
 type record struct {
 	hostname string
 	fqdn     string
-	value    string
+	values   []string
 }
 
 var rec []record
@@ -55,18 +54,20 @@ func request(w dns.ResponseWriter, r *dns.Msg) {
 				}
 				m.Answer = append(m.Answer, rr)
 			case dns.TypeTXT:
-				rr, err := dns.NewRR(fmt.Sprintf("%s 10 IN TXT %s", q.Name, rec.value))
-				if err != nil {
-					log.Fatalf("Failed to create RR: %v", err)
+				for _, value := range rec.values {
+					rr, err := dns.NewRR(fmt.Sprintf("%s 10 IN TXT %s", q.Name, value))
+					if err != nil {
+						log.Fatalf("Failed to create RR: %v", err)
+					}
+					m.Answer = append(m.Answer, rr)
 				}
-				m.Answer = append(m.Answer, rr)
 			}
 		}
 	}
 	w.WriteMsg(m)
 }
 
-func (d *DNSProvider) Run() error {
+func (d *DNSProvider) Run(fqdn, value string) error {
 	// DNSサーバの起動
 	// recが空の場合は初回起動
 	if len(rec) == 0 {
@@ -75,11 +76,21 @@ func (d *DNSProvider) Run() error {
 	}
 
 	// レコードの設定
-	rec = append(rec, record{
-		hostname: d.config.ServerHostname,
-		fqdn:     d.config.fqdn,
-		value:    d.config.value,
-	})
+	alreadyExistsRecord := false
+	for i, r := range rec {
+		if r.fqdn == fqdn {
+			alreadyExistsRecord = true
+			rec[i].values = append(rec[i].values, value)
+			break
+		}
+	}
+	if !alreadyExistsRecord {
+		rec = append(rec, record{
+			hostname: d.config.ServerHostname,
+			fqdn:     fqdn,
+			values:   []string{value},
+		})
+	}
 
 	dns.HandleFunc(".", request)
 	go func() {
@@ -94,16 +105,22 @@ func (d *DNSProvider) Run() error {
 }
 
 func (d *DNSProvider) Stop(domain, keyAuth string) error {
-	// recからレコードを削除
-	newRec := rec[:0]
-	for _, r := range rec {
-		fqdn, value := dns01.GetRecord(domain, keyAuth)
-		if r.fqdn != fqdn && r.value != value {
-			// 完了していないものは残す
-			newRec = append(newRec, r)
-		}
-	}
-	rec = newRec
+	// fqdn, value := dns01.GetRecord(domain, keyAuth)
+	// fmt.Printf("Stop() 1: domain=%s, keyAuth=%s, fqdn=%s, value=%s, rec=%+v\n", domain, keyAuth, fqdn, value, rec)
+
+	// // // recからレコードを削除
+	// newRec := rec[:0]
+	// // for _, r := range rec {
+	// // 	if r.fqdn != fqdn && r.value != value {
+	// // 		// 完了していないものは残す
+	// // 		newRec = append(newRec, r)
+	// // 	}
+	// // }
+	// rec = newRec
+
+	// fmt.Printf("Stop() 2: domain=%s, keyAuth=%s, rec=%+v newRec=%+v\n", domain, keyAuth, rec, newRec)
+
+	// いろいろ変えた結果、rec が空になることはないので、あんまりよくない
 
 	// recが空の場合はサーバを停止
 	if len(rec) == 0 {

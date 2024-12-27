@@ -86,7 +86,7 @@ func NewDNSProviderConfig(config *Config) (*DNSProvider, error) {
 // Present creates a TXT record to fulfil the dns-01 challenge.
 func (d *DNSProvider) Present(domain, token, keyAuth string) error {
 	d.config.fqdn, d.config.value = dns01.GetRecord(domain, keyAuth)
-	return d.Run()
+	return d.Run(d.config.fqdn, d.config.value)
 }
 
 // CleanUp removes the TXT record matching the specified parameters.
