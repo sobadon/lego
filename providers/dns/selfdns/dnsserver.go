@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/miekg/dns"
 )
 
@@ -92,11 +93,13 @@ func (d *DNSProvider) Run() error {
 	return nil
 }
 
-func (d *DNSProvider) Stop() error {
+func (d *DNSProvider) Stop(domain, keyAuth string) error {
 	// recからレコードを削除
 	newRec := rec[:0]
 	for _, r := range rec {
-		if r.fqdn != d.config.fqdn {
+		fqdn, value := dns01.GetRecord(domain, keyAuth)
+		if r.fqdn != fqdn && r.value != value {
+			// 完了していないものは残す
 			newRec = append(newRec, r)
 		}
 	}

@@ -91,7 +91,7 @@ func (d *DNSProvider) Present(domain, token, keyAuth string) error {
 
 // CleanUp removes the TXT record matching the specified parameters.
 func (d *DNSProvider) CleanUp(domain, token, keyAuth string) error {
-	return d.Stop()
+	return d.Stop(domain, keyAuth)
 }
 
 // Timeout returns the timeout and interval to use when checking for DNS propagation.
